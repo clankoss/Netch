@@ -415,11 +415,6 @@ namespace Netch.Forms
             Show();
         }
 
-        private void fAQToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Utils.Utils.Open("https://docs.netch.org");
-        }
-
         #endregion
 
         #region ControlButton

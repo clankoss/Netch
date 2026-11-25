@@ -43,7 +43,6 @@
             this.removeNetchFirewallRulesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.HelpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.CheckForUpdatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.fAQToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.AboutToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.VersionLabel = new System.Windows.Forms.ToolStripLabel();
@@ -210,8 +209,7 @@
             // HelpToolStripMenuItem
             // 
             this.HelpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.CheckForUpdatesToolStripMenuItem,
-            this.fAQToolStripMenuItem});
+            this.CheckForUpdatesToolStripMenuItem});
             this.HelpToolStripMenuItem.Margin = new System.Windows.Forms.Padding(0, 0, 0, 1);
             this.HelpToolStripMenuItem.Name = "HelpToolStripMenuItem";
             this.HelpToolStripMenuItem.Size = new System.Drawing.Size(47, 21);
@@ -223,13 +221,6 @@
             this.CheckForUpdatesToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
             this.CheckForUpdatesToolStripMenuItem.Text = "Check Proxy Core Updates";
             this.CheckForUpdatesToolStripMenuItem.Click += new System.EventHandler(this.CheckForUpdatesToolStripMenuItem_Click);
-            // 
-            // fAQToolStripMenuItem
-            // 
-            this.fAQToolStripMenuItem.Name = "fAQToolStripMenuItem";
-            this.fAQToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
-            this.fAQToolStripMenuItem.Text = "FAQ";
-            this.fAQToolStripMenuItem.Click += new System.EventHandler(this.fAQToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
@@ -749,7 +740,6 @@
         private System.Windows.Forms.ToolStripLabel VersionLabel;
         private System.Windows.Forms.ToolStripStatusLabel NatTypeStatusLightLabel;
         private System.Windows.Forms.ToolStripStatusLabel blankToolStripStatusLabel;
-        private System.Windows.Forms.ToolStripMenuItem fAQToolStripMenuItem;
 
         #endregion
 
