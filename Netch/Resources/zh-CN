@@ -180,5 +180,11 @@
     "Application update failed.": "应用更新失败。",
     "Testing server endpoint latency": "正在测试节点入口延迟",
     "Test proxy connection": "测试代理连通性",
-    "Test NAT type": "测试 NAT 类型"
+    "Test NAT type": "测试 NAT 类型",
+    "Edit server": "编辑服务器",
+    "Delete server": "删除服务器",
+    "Test server latency": "测试服务器延迟",
+    "Copy server link": "复制服务器链接",
+    "Edit mode": "编辑模式",
+    "Delete mode": "删除模式"
 }

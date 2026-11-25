@@ -33,10 +33,12 @@ namespace Netch.Forms
         private readonly Dictionary<string, object> _mainFormText = new();
 
         private bool _textRecorded;
+        private readonly ToolTip _actionToolTips;
 
         public MainForm()
         {
             InitializeComponent();
+            _actionToolTips = new ToolTip(components!);
             var appUpdate = new ToolStripMenuItem("Check for Application Updates") { Name = "AppUpdateMenuItem" };
             appUpdate.Click += CheckForAppUpdates_Click;
             HelpToolStripMenuItem.DropDownItems.Insert(0, appUpdate);
@@ -95,9 +97,6 @@ namespace Netch.Forms
             // 隐藏 ConnectivityStatusLabel
             ConnectivityStatusVisible(false);
 
-            // 加载快速配置
-            LoadProfiles();
-
             // 检查更新
             if (Global.Settings.CheckUpdateWhenOpened)
                 CheckCoreUpdatesAsync(interactive: false).Forget();
@@ -127,11 +126,6 @@ namespace Netch.Forms
             _numberBoxWidth = ServerComboBox.Width / 10;
             _numberBoxX = _numberBoxWidth * 9;
             _numberBoxWrap = _numberBoxWidth / 30;
-
-            _configurationGroupBoxHeight = ConfigurationGroupBox.Height;
-            _profileConfigurationHeight = ConfigurationGroupBox.Controls[0].Height / 3; // 因为 AutoSize, 所以得到的是Controls的总高度
-            _profileGroupBoxPaddingHeight = ProfileGroupBox.Height - ProfileTable.Height;
-            _profileTableHeight = ProfileTable.Height;
         }
 
         private void TranslateControls()
@@ -212,6 +206,19 @@ namespace Netch.Forms
             UsedBandwidthLabel.Text = $@"{i18N.Translate("Used", ": ")}0 KB";
             State = State;
             VersionLabel.Text = UpdateChecker.Version;
+
+            SetActionLabel(EditServerButton, "Edit server");
+            SetActionLabel(DeleteServerButton, "Delete server");
+            SetActionLabel(SpeedButton, "Test server latency");
+            SetActionLabel(CopyLinkButton, "Copy server link");
+            SetActionLabel(EditModeButton, "Edit mode");
+            SetActionLabel(DeleteModeButton, "Delete mode");
+        }
+
+        private void SetActionLabel(ActionIconButton button, string label)
+        {
+            button.AccessibleName = i18N.Translate(label);
+            _actionToolTips.SetToolTip(button, button.AccessibleName);
         }
 
         #endregion
@@ -514,14 +521,10 @@ namespace Netch.Forms
                 i18N.Load(Global.Settings.Language);
                 TranslateControls();
                 LoadModes();
-                LoadProfiles();
             }
 
             if (oldSettings.DetectionTick != Global.Settings.DetectionTick)
                 DelayTestHelper.UpdateTick(true);
-
-            if (oldSettings.ProfileCount != Global.Settings.ProfileCount)
-                LoadProfiles();
 
             Show();
         }
@@ -554,7 +557,7 @@ namespace Netch.Forms
             Global.Settings.ServerComboBoxSelectedIndex = ServerComboBox.SelectedIndex;
         }
 
-        private async void EditServerPictureBox_Click(object sender, EventArgs e)
+        private async void EditServerButton_Click(object sender, EventArgs e)
         {
             // 当前ServerComboBox中至少有一项
             if (!(ServerComboBox.SelectedItem is Server server))
@@ -568,7 +571,7 @@ namespace Netch.Forms
             await Configuration.SaveAsync();
         }
 
-        private async void SpeedPictureBox_Click(object sender, EventArgs e)
+        private async void SpeedButton_Click(object sender, EventArgs e)
         {
             Enabled = false;
             try
@@ -592,7 +595,7 @@ namespace Netch.Forms
             }
         }
 
-        private void CopyLinkPictureBox_Click(object sender, EventArgs e)
+        private void CopyLinkButton_Click(object sender, EventArgs e)
         {
             // 当前ServerComboBox中至少有一项
             if (!(ServerComboBox.SelectedItem is Server server))
@@ -618,7 +621,7 @@ namespace Netch.Forms
             }
         }
 
-        private void DeleteServerPictureBox_Click(object sender, EventArgs e)
+        private void DeleteServerButton_Click(object sender, EventArgs e)
         {
             // 当前 ServerComboBox 中至少有一项
             if (!(ServerComboBox.SelectedItem is Server server))
@@ -660,7 +663,7 @@ namespace Netch.Forms
             Global.Settings.ModeComboBoxSelectedIndex = ModeComboBox.SelectedIndex;
         }
 
-        private void EditModePictureBox_Click(object sender, EventArgs e)
+        private void EditModeButton_Click(object sender, EventArgs e)
         {
             // 当前ModeComboBox中至少有一项
             if (ModeComboBox.SelectedIndex == -1)
@@ -695,7 +698,7 @@ namespace Netch.Forms
             }
         }
 
-        private void DeleteModePictureBox_Click(object sender, EventArgs e)
+        private void DeleteModeButton_Click(object sender, EventArgs e)
         {
             // 当前ModeComboBox中至少有一项
             if (ModeComboBox.Items.Count <= 0 || ModeComboBox.SelectedIndex == -1)
@@ -706,179 +709,6 @@ namespace Netch.Forms
 
             ModeHelper.Delete((Mode)ModeComboBox.SelectedItem);
             SelectLastMode();
-        }
-
-        #endregion
-
-        #region Profile
-
-        private int _configurationGroupBoxHeight;
-        private int _profileConfigurationHeight;
-        private int _profileGroupBoxPaddingHeight;
-        private int _profileTableHeight;
-
-        private void LoadProfiles()
-        {
-            // Clear
-            foreach (var button in ProfileTable.Controls)
-                ((Button)button).Dispose();
-
-            ProfileTable.Controls.Clear();
-            ProfileTable.ColumnStyles.Clear();
-            ProfileTable.RowStyles.Clear();
-
-            var profileCount = Global.Settings.ProfileCount;
-            if (profileCount == 0)
-            {
-                // Hide Profile GroupBox, Change window size
-                configLayoutPanel.RowStyles[2].SizeType = SizeType.Percent;
-                configLayoutPanel.RowStyles[2].Height = 0;
-                ProfileGroupBox.Visible = false;
-
-                ConfigurationGroupBox.Height = _configurationGroupBoxHeight - _profileConfigurationHeight;
-            }
-            else
-            {
-                // Load Profiles
-
-                if (Global.Settings.ProfileTableColumnCount == 0)
-                    Global.Settings.ProfileTableColumnCount = 5;
-
-                var columnCount = Global.Settings.ProfileTableColumnCount;
-
-                ProfileTable.ColumnCount = profileCount >= columnCount ? columnCount : profileCount;
-                ProfileTable.RowCount = (int)Math.Ceiling(profileCount / (float)columnCount);
-
-                for (var i = 0; i < profileCount; ++i)
-                {
-                    var profile = Global.Settings.Profiles.SingleOrDefault(p => p.Index == i);
-                    var b = new Button
-                    {
-                        Dock = DockStyle.Fill,
-                        Text = profile?.ProfileName ?? i18N.Translate("None"),
-                        Tag = profile
-                    };
-
-                    b.Click += ProfileButton_Click;
-                    ProfileTable.Controls.Add(b, i % columnCount, i / columnCount);
-                }
-
-                // equal column
-                for (var i = 1; i <= ProfileTable.RowCount; i++)
-                    ProfileTable.RowStyles.Add(new RowStyle(SizeType.Percent, 1));
-
-                for (var i = 1; i <= ProfileTable.ColumnCount; i++)
-                    ProfileTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 1));
-
-                configLayoutPanel.RowStyles[2].SizeType = SizeType.AutoSize;
-                ProfileGroupBox.Visible = true;
-                ProfileGroupBox.Height = ProfileTable.RowCount * _profileTableHeight + _profileGroupBoxPaddingHeight;
-                ConfigurationGroupBox.Height = _configurationGroupBoxHeight;
-            }
-        }
-
-        private void ActiveProfile(Profile profile)
-        {
-            ProfileNameText.Text = profile.ProfileName;
-
-            var server = ServerComboBox.Items.Cast<Server>().FirstOrDefault(s => s.Remark.Equals(profile.ServerRemark));
-            var mode = ModeComboBox.Items.Cast<Mode>().FirstOrDefault(m => m.Remark.Equals(profile.ModeRemark));
-
-            if (server == null)
-                throw new Exception("Server not found.");
-
-            if (mode == null)
-                throw new Exception("Mode not found.");
-
-            ServerComboBox.SelectedItem = server;
-            ModeComboBox.SelectedItem = mode;
-        }
-
-        private Profile CreateProfileAtIndex(int index)
-        {
-            var server = (Server)ServerComboBox.SelectedItem;
-            var mode = (Mode)ModeComboBox.SelectedItem;
-            var name = ProfileNameText.Text;
-
-            Profile? profile;
-            if ((profile = Global.Settings.Profiles.SingleOrDefault(p => p.Index == index)) != null)
-                Global.Settings.Profiles.Remove(profile);
-
-            profile = new Profile(server, mode, name, index);
-            Global.Settings.Profiles.Add(profile);
-            return profile;
-        }
-
-        private async void ProfileButton_Click([NotNull] object? sender, EventArgs? e)
-        {
-            if (sender == null)
-                throw new ArgumentNullException(nameof(sender));
-
-            var profileButton = (Button)sender;
-            var profile = (Profile?)profileButton.Tag;
-            var index = ProfileTable.Controls.IndexOf(profileButton);
-
-            switch (ModifierKeys)
-            {
-                case Keys.Control:
-                    if (ServerComboBox.SelectedIndex == -1)
-                    {
-                        MessageBoxX.Show(i18N.Translate("Please select a server first"));
-                        return;
-                    }
-
-                    if (ModeComboBox.SelectedIndex == -1)
-                    {
-                        MessageBoxX.Show(i18N.Translate("Please select a mode first"));
-                        return;
-                    }
-
-                    if (ProfileNameText.Text == "")
-                    {
-                        MessageBoxX.Show(i18N.Translate("Please enter a profile name first"));
-                        ProfileNameText.Focus();
-                        return;
-                    }
-
-                    profileButton.Tag = profile = CreateProfileAtIndex(index);
-                    profileButton.Text = profile.ProfileName;
-                    ProfileNameText.Clear();
-                    return;
-                case Keys.Shift:
-                    if (profile == null)
-                        return;
-
-                    Global.Settings.Profiles.Remove(profile);
-                    profileButton.Tag = null;
-                    profileButton.Text = i18N.Translate("None");
-                    return;
-            }
-
-            if (profile == null)
-            {
-                MessageBoxX.Show(i18N.Translate("No saved profile here. Save a profile first by Ctrl+Click on the button"));
-                return;
-            }
-
-            try
-            {
-                ActiveProfile(profile);
-            }
-            catch (Exception exception)
-            {
-                MessageBoxX.Show(exception.Message, LogLevel.ERROR);
-                return;
-            }
-
-            // start the profile
-            ControlButton_Click(null, null);
-            if (State == State.Stopping || State == State.Stopped)
-            {
-                while (State != State.Stopped)
-                    await Task.Delay(250);
-
-                ControlButton_Click(null, null);
-            }
         }
 
         #endregion
@@ -897,8 +727,8 @@ namespace Netch.Forms
             {
                 void StartDisableItems(bool enabled)
                 {
-                    ServerComboBox.Enabled = ModeComboBox.Enabled = EditModePictureBox.Enabled =
-                        EditServerPictureBox.Enabled = DeleteModePictureBox.Enabled = DeleteServerPictureBox.Enabled = enabled;
+                    ServerComboBox.Enabled = ModeComboBox.Enabled = EditModeButton.Enabled =
+                        EditServerButton.Enabled = DeleteModeButton.Enabled = DeleteServerButton.Enabled = enabled;
 
                     // 启动需要禁用的控件
                     ServerToolStripMenuItem.Enabled = ModeToolStripMenuItem.Enabled =
@@ -921,21 +751,18 @@ namespace Netch.Forms
                         ControlButton.Enabled = false;
                         ControlButton.Text = "...";
 
-                        ProfileGroupBox.Enabled = false;
                         StartDisableItems(false);
                         break;
                     case State.Started:
                         ControlButton.Enabled = true;
                         ControlButton.Text = i18N.Translate("Stop");
 
-                        ProfileGroupBox.Enabled = true;
 
                         break;
                     case State.Stopping:
                         ControlButton.Enabled = false;
                         ControlButton.Text = "...";
 
-                        ProfileGroupBox.Enabled = false;
                         BandwidthState(false);
                         ConnectivityStatusVisible(false);
                         break;
@@ -947,7 +774,6 @@ namespace Netch.Forms
                         LastDownloadBandwidth = 0;
                         Bandwidth.Stop();
 
-                        ProfileGroupBox.Enabled = true;
                         StartDisableItems(true);
                         break;
                 }

@@ -42,8 +42,6 @@ namespace Netch.Forms
             this.ServerPingTypeLabel = new System.Windows.Forms.Label();
             this.ICMPingRadioBtn = new System.Windows.Forms.RadioButton();
             this.TCPingRadioBtn = new System.Windows.Forms.RadioButton();
-            this.ProfileCountLabel = new System.Windows.Forms.Label();
-            this.ProfileCountTextBox = new System.Windows.Forms.TextBox();
             this.DetectionTickLabel = new System.Windows.Forms.Label();
             this.DetectionTickTextBox = new System.Windows.Forms.TextBox();
             this.StartedPingLabel = new System.Windows.Forms.Label();
@@ -144,8 +142,6 @@ namespace Netch.Forms
             this.GeneralTabPage.Controls.Add(this.ServerPingTypeLabel);
             this.GeneralTabPage.Controls.Add(this.ICMPingRadioBtn);
             this.GeneralTabPage.Controls.Add(this.TCPingRadioBtn);
-            this.GeneralTabPage.Controls.Add(this.ProfileCountLabel);
-            this.GeneralTabPage.Controls.Add(this.ProfileCountTextBox);
             this.GeneralTabPage.Controls.Add(this.DetectionTickLabel);
             this.GeneralTabPage.Controls.Add(this.DetectionTickTextBox);
             this.GeneralTabPage.Controls.Add(this.StartedPingLabel);
@@ -251,27 +247,10 @@ namespace Netch.Forms
             this.TCPingRadioBtn.Text = "TCPing";
             this.TCPingRadioBtn.UseVisualStyleBackColor = true;
             // 
-            // ProfileCountLabel
-            // 
-            this.ProfileCountLabel.AutoSize = true;
-            this.ProfileCountLabel.Location = new System.Drawing.Point(15, 140);
-            this.ProfileCountLabel.Name = "ProfileCountLabel";
-            this.ProfileCountLabel.Size = new System.Drawing.Size(83, 17);
-            this.ProfileCountLabel.TabIndex = 5;
-            this.ProfileCountLabel.Text = "Profile Count";
-            // 
-            // ProfileCountTextBox
-            // 
-            this.ProfileCountTextBox.Location = new System.Drawing.Point(182, 137);
-            this.ProfileCountTextBox.Name = "ProfileCountTextBox";
-            this.ProfileCountTextBox.Size = new System.Drawing.Size(70, 23);
-            this.ProfileCountTextBox.TabIndex = 6;
-            this.ProfileCountTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
             // DetectionTickLabel
             // 
             this.DetectionTickLabel.AutoSize = true;
-            this.DetectionTickLabel.Location = new System.Drawing.Point(15, 170);
+            this.DetectionTickLabel.Location = new System.Drawing.Point(15, 140);
             this.DetectionTickLabel.Name = "DetectionTickLabel";
             this.DetectionTickLabel.Size = new System.Drawing.Size(117, 17);
             this.DetectionTickLabel.TabIndex = 7;
@@ -279,7 +258,7 @@ namespace Netch.Forms
             // 
             // DetectionTickTextBox
             // 
-            this.DetectionTickTextBox.Location = new System.Drawing.Point(182, 167);
+            this.DetectionTickTextBox.Location = new System.Drawing.Point(182, 137);
             this.DetectionTickTextBox.Name = "DetectionTickTextBox";
             this.DetectionTickTextBox.Size = new System.Drawing.Size(70, 23);
             this.DetectionTickTextBox.TabIndex = 8;
@@ -288,7 +267,7 @@ namespace Netch.Forms
             // StartedPingLabel
             // 
             this.StartedPingLabel.AutoSize = true;
-            this.StartedPingLabel.Location = new System.Drawing.Point(15, 200);
+            this.StartedPingLabel.Location = new System.Drawing.Point(15, 170);
             this.StartedPingLabel.Name = "StartedPingLabel";
             this.StartedPingLabel.Size = new System.Drawing.Size(153, 17);
             this.StartedPingLabel.TabIndex = 9;
@@ -296,7 +275,7 @@ namespace Netch.Forms
             // 
             // StartedPingIntervalTextBox
             // 
-            this.StartedPingIntervalTextBox.Location = new System.Drawing.Point(182, 197);
+            this.StartedPingIntervalTextBox.Location = new System.Drawing.Point(182, 167);
             this.StartedPingIntervalTextBox.Name = "StartedPingIntervalTextBox";
             this.StartedPingIntervalTextBox.Size = new System.Drawing.Size(70, 23);
             this.StartedPingIntervalTextBox.TabIndex = 10;
@@ -1005,8 +984,6 @@ namespace Netch.Forms
         private System.Windows.Forms.Label StartedPingLabel;
         private System.Windows.Forms.Label STUNServerLabel;
         private System.Windows.Forms.ComboBox STUN_ServerComboBox;
-        private System.Windows.Forms.Label ProfileCountLabel;
-        private System.Windows.Forms.TextBox ProfileCountTextBox;
         private System.Windows.Forms.GroupBox KCPGroupBox;
         private System.Windows.Forms.CheckBox congestionCheckBox;
         private System.Windows.Forms.CheckBox TLSAllowInsecureCheckBox;

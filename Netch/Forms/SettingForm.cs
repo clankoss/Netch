@@ -44,7 +44,6 @@ namespace Netch.Forms
 
             BindRadioBox(TCPingRadioBtn, c => Global.Settings.ServerTCPing = c, Global.Settings.ServerTCPing);
 
-            BindTextBox<int>(ProfileCountTextBox, i => i > -1, i => Global.Settings.ProfileCount = i, Global.Settings.ProfileCount);
             BindTextBox<int>(DetectionTickTextBox,
                 i => DelayTestHelper.Range.InRange(i),
                 i => Global.Settings.DetectionTick = i,
