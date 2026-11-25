@@ -1,0 +1,48 @@
+﻿name: Publish Netch Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+      - '*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - name: Build and package Windows x64
+        shell: pwsh
+        run: |
+          $tag = $env:GITHUB_REF_NAME
+          if ($tag -notmatch '^v?(\d+\.\d+\.\d+)$') {
+            throw 'Use a stable version tag such as v2.0.0.'
+          }
+          $version = $Matches[1]
+          $projectVersion = (dotnet msbuild Netch/Netch.csproj -getProperty:Version).Trim()
+          if ($LASTEXITCODE -ne 0 -or $projectVersion -ne $version) {
+            throw "Tag $tag must match the application version ($projectVersion)."
+          }
+
+          .\build.ps1 -Configuration Release -OutputPath artifacts/Netch
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Copy-Item README.md,LICENSE -Destination artifacts/Netch
+          $package = "Netch-$version-win-x64.zip"
+          Compress-Archive -Path artifacts/Netch -DestinationPath "artifacts/$package"
+          $hash = (Get-FileHash "artifacts/$package" -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  $package" | Set-Content -Path "artifacts/$package.sha256" -Encoding ascii
+          "NETCH_PACKAGE=$package" >> $env:GITHUB_ENV
+      - name: Publish GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $package = "artifacts/$env:NETCH_PACKAGE"
+          gh release create $env:GITHUB_REF_NAME $package "$package.sha256" --verify-tag --generate-notes
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
