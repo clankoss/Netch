@@ -89,11 +89,9 @@ namespace Netch.Services
 
         private static void Apply(int parentId)
         {
-            var payload = Global.NetchDir;
-            var stage = Directory.GetParent(payload);
-            if (stage?.Parent is not { } install || !IsStageName(stage.Name) ||
-                !Path.GetFileName(payload).Equals("Netch", StringComparison.OrdinalIgnoreCase))
-                throw new InvalidOperationException("Invalid Netch update location.");
+            var payload = Path.TrimEndingDirectorySeparator(Global.NetchDir);
+            var stage = GetValidatedStage(payload);
+            var install = stage.Parent!;
 
             WaitForExit(parentId);
             ApplyPackage(payload, install.FullName, Path.Combine(stage.FullName, "backup"), () =>
@@ -101,6 +99,17 @@ namespace Netch.Services
                 using var restarted = Launch(Path.Combine(install.FullName, "Netch.exe"), CleanupArgument,
                     Environment.ProcessId.ToString(), stage.Name);
             });
+        }
+
+        internal static DirectoryInfo GetValidatedStage(string payload)
+        {
+            var package = new DirectoryInfo(Path.TrimEndingDirectorySeparator(payload));
+            var stage = package.Parent;
+            if (stage?.Parent == null || !IsStageName(stage.Name) ||
+                !package.Name.Equals("Netch", StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("Invalid Netch update location.");
+
+            return stage;
         }
 
         internal static void ApplyPackage(string payload, string install, string backup, Action restart)

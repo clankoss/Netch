@@ -8,6 +8,27 @@ namespace UnitTest
     [TestClass]
     public class AppUpdateTests
     {
+        [DataTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public void ValidatesStagedAppPathWithOrWithoutTrailingSeparator(bool trailingSeparator)
+        {
+            var install = Path.Combine(Path.GetTempPath(), "Netch Install");
+            var stage = Path.Combine(install, ".netch-update-0123456789abcdef0123456789abcdef");
+            var payload = Path.Combine(stage, "Netch");
+            if (trailingSeparator)
+                payload += Path.DirectorySeparatorChar;
+
+            Assert.AreEqual(stage, Updater.GetValidatedStage(payload).FullName);
+        }
+
+        [TestMethod]
+        public void RejectsApplicationOutsideUpdateStage()
+        {
+            var payload = Path.Combine(Path.GetTempPath(), "Unrelated Folder", "Netch") + Path.DirectorySeparatorChar;
+            Assert.ThrowsException<InvalidOperationException>(() => Updater.GetValidatedStage(payload));
+        }
+
         [TestMethod]
         public void UpdatePreservesConfigurationAndCustomModes()
         {
