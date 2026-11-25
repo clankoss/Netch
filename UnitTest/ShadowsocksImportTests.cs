@@ -31,6 +31,25 @@ namespace UnitTest
             Assert.AreEqual("Game SS", server.Remark);
         }
 
+        [DataTestMethod]
+        [DataRow("?", null)]
+        [DataRow("/?", null)]
+        [DataRow("/?plugin=v2ray-plugin%3Bmode%3Dwebsocket", "v2ray-plugin")]
+        public void ClipboardAcceptsSs2022LinkWithQueryBeforeRemark(string query, string? plugin)
+        {
+            const string method = "2022-blake3-aes-128-gcm";
+            var password = Convert.ToBase64String(new byte[16]);
+            var userInfo = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{method}:{password}"));
+            var server = (ShadowsocksServer)ShareLink.ParseText($"ss://{userInfo}@example.com:65531{query}#Test").Single();
+
+            Assert.AreEqual(method, server.EncryptMethod);
+            Assert.AreEqual(password, server.Password);
+            Assert.AreEqual((ushort)65531, server.Port);
+            Assert.AreEqual("Test", server.Remark);
+            Assert.AreEqual(plugin, server.Plugin);
+            Assert.AreEqual(plugin == null ? null : "mode=websocket", server.PluginOption);
+        }
+
         [TestMethod]
         public void ClipboardDecodesPlainCredentialsExactlyOnce()
         {

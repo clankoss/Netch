@@ -180,5 +180,8 @@
     "No newer application release is available.": "当前没有更新的应用版本。",
     "Netch {0} is available. Download and install it? Active proxy sessions will stop.": "Netch {0} 已发布。是否下载并安装？当前代理连接会中断。",
     "Downloading application update…": "正在下载应用更新…",
-    "Application update failed.": "应用更新失败。"
+    "Application update failed.": "应用更新失败。",
+    "Testing server endpoint latency": "正在测试节点入口延迟",
+    "Test proxy connection": "测试代理连通性",
+    "Test NAT type": "测试 NAT 类型"
 }

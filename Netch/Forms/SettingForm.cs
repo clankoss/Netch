@@ -51,7 +51,7 @@ namespace Netch.Forms
                 Global.Settings.DetectionTick);
 
             BindTextBox<int>(StartedPingIntervalTextBox,
-                _ => true,
+                i => i >= -1 && i <= int.MaxValue / 1000,
                 i => Global.Settings.StartedPingInterval = i,
                 Global.Settings.StartedPingInterval);
 

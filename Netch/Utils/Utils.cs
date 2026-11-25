@@ -37,34 +37,40 @@ namespace Netch.Utils
             }
         }
 
-        public static async Task<int> TCPingAsync(IPAddress ip, int port, int timeout = 1000, CancellationToken ct = default)
+        public static async Task<int?> TCPingAsync(IPAddress ip, int port, int timeout = 1000, CancellationToken ct = default)
         {
             using var client = new TcpClient(ip.AddressFamily);
-
+            using var deadline = CancellationTokenSource.CreateLinkedTokenSource(ct);
+            deadline.CancelAfter(timeout);
             var stopwatch = Stopwatch.StartNew();
 
-            var task = client.ConnectAsync(ip, port);
-
-            var resTask = await Task.WhenAny(task, Task.Delay(timeout, ct));
-
-            stopwatch.Stop();
-            if (resTask == task && client.Connected)
+            try
             {
-                var t = Convert.ToInt32(stopwatch.Elapsed.TotalMilliseconds);
-                return t;
+                await client.ConnectAsync(ip, port, deadline.Token);
+                return Convert.ToInt32(stopwatch.Elapsed.TotalMilliseconds);
             }
-
-            return timeout;
+            catch (SocketException)
+            {
+                return null;
+            }
+            catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+            {
+                return null;
+            }
         }
 
-        public static async Task<int> ICMPingAsync(IPAddress ip, int timeout = 1000)
+        public static async Task<int?> ICMPingAsync(IPAddress ip, int timeout = 1000)
         {
-            var reply = await new Ping().SendPingAsync(ip, timeout);
-
-            if (reply.Status == IPStatus.Success)
-                return Convert.ToInt32(reply.RoundtripTime);
-
-            return timeout;
+            using var ping = new Ping();
+            try
+            {
+                var reply = await ping.SendPingAsync(ip, timeout);
+                return reply.Status == IPStatus.Success ? Convert.ToInt32(reply.RoundtripTime) : null;
+            }
+            catch (PingException)
+            {
+                return null;
+            }
         }
 
         public static async Task<string> GetCityCodeAsync(string address)

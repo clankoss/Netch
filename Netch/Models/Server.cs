@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Text.Json.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 using Netch.Utils;
 
@@ -68,42 +70,39 @@ namespace Netch.Models
         ///     测试延迟
         /// </summary>
         /// <returns>延迟</returns>
-        public async Task<int> PingAsync()
+        public async Task<int> PingAsync(CancellationToken cancellationToken = default)
         {
-            try
+            var destination = await DnsUtils.LookupAsync(Hostname);
+            if (destination == null)
+                return Delay = -2;
+
+            cancellationToken.ThrowIfCancellationRequested();
+            var tcp = Global.Settings.ServerTCPing;
+            var result = await MeasureDelayAsync(() => tcp
+                ? Utils.Utils.TCPingAsync(destination, Port, ct: cancellationToken)
+                : Utils.Utils.ICMPingAsync(destination), cancellationToken);
+
+            return Delay = result ?? -3;
+        }
+
+        internal static async Task<int?> MeasureDelayAsync(Func<Task<int?>> probe, CancellationToken cancellationToken = default)
+        {
+            var samples = new List<int>(3);
+            for (var i = 0; i < 3; i++)
             {
-                var destination = await DnsUtils.LookupAsync(Hostname);
-                if (destination == null)
-                    return Delay = -2;
-
-                var list = new Task<int>[3];
-                for (var i = 0; i < 3; i++)
-                {
-                    async Task<int> PingCoreAsync()
-                    {
-                        try
-                        {
-                            return Global.Settings.ServerTCPing
-                                ? await Utils.Utils.TCPingAsync(destination, Port)
-                                : await Utils.Utils.ICMPingAsync(destination);
-                        }
-                        catch (Exception)
-                        {
-                            return -4;
-                        }
-                    }
-
-                    list[i] = PingCoreAsync();
-                }
-
-                var resTask = await Task.WhenAny(list[0], list[1], list[2]);
-
-                return Delay = await resTask;
+                cancellationToken.ThrowIfCancellationRequested();
+                if (await probe() is int delay)
+                    samples.Add(delay);
             }
-            catch (Exception)
+            cancellationToken.ThrowIfCancellationRequested();
+
+            samples.Sort();
+            return samples.Count switch
             {
-                return Delay = -4;
-            }
+                2 => (samples[0] + samples[1]) / 2,
+                3 => samples[1],
+                _ => null
+            };
         }
     }
 

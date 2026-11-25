@@ -100,22 +100,17 @@ namespace Netch.Servers
         {
             var data = new ShadowsocksServer();
 
-            text = text.Replace("/?", "?");
-            if (text.Contains("#"))
+            var fragmentStart = text.IndexOf('#');
+            if (fragmentStart >= 0)
             {
-                data.Remark = HttpUtility.UrlDecode(text.Split('#')[1]);
-                text = text.Split('#')[0];
+                data.Remark = HttpUtility.UrlDecode(text[(fragmentStart + 1)..]);
+                text = text[..fragmentStart];
             }
 
-            if (text.Contains("?"))
+            var queryStart = text.IndexOf('?');
+            if (queryStart >= 0)
             {
-                var finder = new Regex(@"^(?<data>.+?)\?(.+)$");
-                var match = finder.Match(text);
-
-                if (!match.Success)
-                    throw new FormatException();
-
-                var plugins = HttpUtility.ParseQueryString(new Uri(text).Query).Get("plugin");
+                var plugins = HttpUtility.ParseQueryString(text[(queryStart + 1)..]).Get("plugin");
                 if (plugins != null)
                 {
                     var parts = plugins.Split(';', 2);
@@ -142,7 +137,7 @@ namespace Netch.Servers
                     data.PluginOption = pluginopts;
                 }
 
-                text = match.Groups["data"].Value;
+                text = text[..queryStart].TrimEnd('/');
             }
 
             if (text.Contains("@"))

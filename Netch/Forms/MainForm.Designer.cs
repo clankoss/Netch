@@ -339,7 +339,6 @@
             // ModeComboBox
             // 
             this.ModeComboBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ModeComboBox.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.ModeComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.ModeComboBox.FormattingEnabled = true;
             this.ModeComboBox.IntegralHeight = false;
@@ -347,7 +346,6 @@
             this.ModeComboBox.Name = "ModeComboBox";
             this.ModeComboBox.Size = new System.Drawing.Size(546, 24);
             this.ModeComboBox.TabIndex = 2;
-            this.ModeComboBox.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.ComboBox_DrawItem);
             this.ModeComboBox.SelectionChangeCommitted += new System.EventHandler(this.ModeComboBox_SelectionChangeCommitted);
             // 
             // ServerComboBox

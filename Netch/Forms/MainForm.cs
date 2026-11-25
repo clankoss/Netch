@@ -469,33 +469,45 @@ namespace Netch.Forms
             State = State.Started;
 
             Task.Run(Bandwidth.NetTraffic).Forget();
-            if (mode.Type != ModeType.Process || Global.Settings.Redirector.FilterProtocol.HasFlag(PortType.UDP))
-                DiscoveryNatTypeAsync().Forget();
-            HttpConnectAsync().Forget();
+
+            HttpStatusLabel.Text = i18N.Translate("Test proxy connection");
+            HttpStatusLabel.Visible = true;
+            NatTypeStatusLabel.Text = i18N.Translate("Test NAT type");
+            NatTypeStatusLabel.Visible = mode.Type != ModeType.Process || Global.Settings.Redirector.FilterProtocol.HasFlag(PortType.UDP);
 
             if (Global.Settings.MinimizeWhenStarted)
                 Minimize();
 
-            // 自动检测延迟
-            async Task StartedPingAsync()
+            if (Global.Settings.StartedPingInterval > 0 && DelayTestHelper.Range.InRange(Global.Settings.StartedPingInterval))
             {
-                while (State == State.Started)
-                {
-                    if (Global.Settings.StartedPingInterval >= 0)
-                    {
-                        await server.PingAsync();
-                        ServerComboBox.Refresh();
+                _startedPingCts = new CancellationTokenSource();
+                PingStartedServerAsync(server, _startedPingCts).Forget();
+            }
+        }
 
-                        await Task.Delay(Global.Settings.StartedPingInterval * 1000);
-                    }
-                    else
+        private CancellationTokenSource? _startedPingCts;
+
+        private async Task PingStartedServerAsync(Server server, CancellationTokenSource source)
+        {
+            using (source)
+            {
+                try
+                {
+                    var interval = TimeSpan.FromSeconds(Global.Settings.StartedPingInterval);
+                    while (!source.IsCancellationRequested)
                     {
-                        await Task.Delay(5000);
+                        await server.PingAsync(source.Token);
+                        ServerComboBox.Refresh();
+                        await Task.Delay(interval, source.Token);
                     }
                 }
+                catch (OperationCanceledException) when (source.IsCancellationRequested) { }
+                finally
+                {
+                    if (_startedPingCts == source)
+                        _startedPingCts = null;
+                }
             }
-
-            StartedPingAsync().Forget();
         }
 
         #endregion
@@ -570,25 +582,25 @@ namespace Netch.Forms
 
         private async void SpeedPictureBox_Click(object sender, EventArgs e)
         {
-            void Enable()
+            Enabled = false;
+            try
+            {
+                StatusText(i18N.Translate("Testing server endpoint latency"));
+                if (!IsWaiting() || ModifierKeys == Keys.Control)
+                {
+                    if (ServerComboBox.SelectedItem is Server server)
+                        await server.PingAsync();
+                }
+                else
+                {
+                    await DelayTestHelper.PerformTestAsync(true);
+                }
+            }
+            finally
             {
                 ServerComboBox.Refresh();
                 Enabled = true;
                 StatusText();
-            }
-
-            Enabled = false;
-            StatusText(i18N.Translate("Testing"));
-
-            if (!IsWaiting() || ModifierKeys == Keys.Control)
-            {
-                (ServerComboBox.SelectedItem as Server)?.PingAsync();
-                Enable();
-            }
-            else
-            {
-                await DelayTestHelper.PerformTestAsync(true);
-                Enable();
             }
         }
 
@@ -965,6 +977,7 @@ namespace Netch.Forms
         private async Task StopCoreAsync()
         {
             State = State.Stopping;
+            _startedPingCts?.Cancel();
             _discoveryNatCts?.Cancel();
             _httpConnectCts?.Cancel();
             await MainController.StopAsync();
@@ -1332,42 +1345,17 @@ namespace Netch.Forms
             // 绘制 备注/名称 字符串
             TextRenderer.DrawText(e.Graphics, cbx.Items[e.Index].ToString(), cbx.Font, e.Bounds, Color.Black, TextFormatFlags.Left);
 
-            switch (cbx.Items[e.Index])
-            {
-                case Server item:
-                {
-                    // 计算延迟底色
-                    var numBoxBackBrush = item.Delay switch { > 200 => Brushes.Red, > 80 => Brushes.Yellow, >= 0 => _greenBrush, _ => Brushes.Gray };
+            if (cbx.Items[e.Index] is not Server item)
+                return;
 
-                    // 绘制延迟底色
-                    e.Graphics.FillRectangle(numBoxBackBrush, _numberBoxX, e.Bounds.Y, _numberBoxWidth, e.Bounds.Height);
-
-                    // 绘制延迟字符串
-                    TextRenderer.DrawText(e.Graphics,
-                        item.Delay.ToString(),
-                        cbx.Font,
-                        new Point(_numberBoxX + _numberBoxWrap, e.Bounds.Y),
-                        Color.Black,
-                        TextFormatFlags.Left);
-
-                    break;
-                }
-                case Mode item:
-                {
-                    // 绘制 模式Box 底色
-                    e.Graphics.FillRectangle(Brushes.Gray, _numberBoxX, e.Bounds.Y, _numberBoxWidth, e.Bounds.Height);
-
-                    // 绘制 模式行数 字符串
-                    TextRenderer.DrawText(e.Graphics,
-                        item.Content.Count.ToString(),
-                        cbx.Font,
-                        new Point(_numberBoxX + _numberBoxWrap, e.Bounds.Y),
-                        Color.Black,
-                        TextFormatFlags.Left);
-
-                    break;
-                }
-            }
+            var brush = item.Delay switch { > 200 => Brushes.Red, > 80 => Brushes.Yellow, >= 0 => _greenBrush, _ => Brushes.Gray };
+            e.Graphics.FillRectangle(brush, _numberBoxX, e.Bounds.Y, _numberBoxWidth, e.Bounds.Height);
+            TextRenderer.DrawText(e.Graphics,
+                item.Delay >= 0 ? item.Delay.ToString() : "--",
+                cbx.Font,
+                new Point(_numberBoxX + _numberBoxWrap, e.Bounds.Y),
+                Color.Black,
+                TextFormatFlags.Left);
         }
 
         #endregion
