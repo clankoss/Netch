@@ -6,7 +6,7 @@
         <OutputType>WinExe</OutputType>
         <Configurations>Debug;Release</Configurations>
         <UseWindowsForms>true</UseWindowsForms>
-        <Version>2.0.4</Version>
+        <Version>2.0.5</Version>
         <SatelliteResourceLanguages>en-US;zh-Hans</SatelliteResourceLanguages>
         <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
         <Copyright>Copyright © 2019 - 2021</Copyright>

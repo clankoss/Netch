@@ -408,13 +408,6 @@ namespace Netch.Forms
             Utils.Utils.Open($"https://github.com/{UpdateChecker.Owner}/{UpdateChecker.Repo}/releases");
         }
 
-        private void AboutToolStripButton_Click(object sender, EventArgs e)
-        {
-            Hide();
-            new AboutForm().ShowDialog();
-            Show();
-        }
-
         #endregion
 
         #region ControlButton

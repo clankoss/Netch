@@ -44,7 +44,6 @@
             this.HelpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.CheckForUpdatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.AboutToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.VersionLabel = new System.Windows.Forms.ToolStripLabel();
             this.ConfigurationGroupBox = new System.Windows.Forms.GroupBox();
             this.configLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
@@ -109,7 +108,6 @@
             this.OptionsToolStripMenuItem,
             this.HelpToolStripMenuItem,
             this.exitToolStripMenuItem,
-            this.AboutToolStripButton,
             this.VersionLabel});
             this.MenuStrip.Location = new System.Drawing.Point(0, 0);
             this.MenuStrip.Name = "MenuStrip";
@@ -224,22 +222,11 @@
             // 
             // exitToolStripMenuItem
             // 
+            this.exitToolStripMenuItem.Margin = new System.Windows.Forms.Padding(0, 0, 0, 1);
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(40, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(40, 21);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
-            // 
-            // AboutToolStripButton
-            // 
-            this.AboutToolStripButton.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.AboutToolStripButton.AutoToolTip = false;
-            this.AboutToolStripButton.Margin = new System.Windows.Forms.Padding(0, 0, 3, 1);
-            this.AboutToolStripButton.Name = "AboutToolStripButton";
-            this.AboutToolStripButton.Size = new System.Drawing.Size(47, 21);
-            this.AboutToolStripButton.Text = "About";
-            this.AboutToolStripButton.Click += new System.EventHandler(this.AboutToolStripButton_Click);
-            // 
-            // 
             // 
             // VersionLabel
             // 
@@ -694,7 +681,6 @@
 
         private System.Windows.Forms.ToolStripMenuItem removeNetchFirewallRulesToolStripMenuItem;
 
-        private System.Windows.Forms.ToolStripButton AboutToolStripButton;
         private System.Windows.Forms.ToolStripMenuItem CleanDNSCacheToolStripMenuItem;
         private System.Windows.Forms.TableLayoutPanel configLayoutPanel;
         private System.Windows.Forms.GroupBox ConfigurationGroupBox;
