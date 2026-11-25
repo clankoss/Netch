@@ -26,6 +26,10 @@ namespace UnitTest
                         try
                         {
                             var input = (TextBox)form.Controls.Find("AddressTextBox", true)[0];
+                            var password = (TextBox)form.Controls.Find("PasswordTextBox", true)[0];
+                            Assert.IsFalse(password.UseSystemPasswordChar);
+                            Assert.AreEqual('\0', password.PasswordChar);
+                            Assert.AreEqual("test", password.Text);
                             Assert.IsTrue(input.Enabled);
                             Assert.IsFalse(input.ReadOnly);
                             input.Focus();

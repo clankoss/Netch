@@ -21,7 +21,7 @@ namespace Netch.Utils
         {
             try
             {
-                text = URLSafeBase64Decode(text);
+                text = URLSafeBase64Decode(text.Trim().TrimStart('\uFEFF'));
             }
             catch
             {
@@ -49,7 +49,7 @@ namespace Netch.Utils
                 {
                     try
                     {
-                        list.AddRange(ParseUri(line));
+                        list.AddRange(ParseUri(line.Trim().TrimStart('\uFEFF')));
                     }
                     catch (Exception e)
                     {

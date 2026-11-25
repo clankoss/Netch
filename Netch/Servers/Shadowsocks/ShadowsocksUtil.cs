@@ -156,14 +156,15 @@ namespace Netch.Servers
                 data.Hostname = match.Groups["server"].Value.Trim('[', ']');
                 data.Port = ushort.Parse(match.Groups["port"].Value);
 
-                var userInfo = match.Groups["base64"].Value;
-                var plain = userInfo.Contains(':');
-                match = parser.Match(plain ? userInfo : ShareLink.URLSafeBase64Decode(userInfo));
+                var userInfo = Uri.UnescapeDataString(match.Groups["base64"].Value);
+                if (!userInfo.Contains(':'))
+                    userInfo = ShareLink.URLSafeBase64Decode(userInfo);
+                match = parser.Match(userInfo);
                 if (!match.Success)
                     throw new FormatException();
 
-                data.EncryptMethod = plain ? Uri.UnescapeDataString(match.Groups["method"].Value) : match.Groups["method"].Value;
-                data.Password = plain ? Uri.UnescapeDataString(match.Groups["password"].Value) : match.Groups["password"].Value;
+                data.EncryptMethod = match.Groups["method"].Value;
+                data.Password = match.Groups["password"].Value;
             }
             else
             {

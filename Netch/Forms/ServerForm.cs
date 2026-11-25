@@ -73,7 +73,7 @@ namespace Netch.Forms
 
         private TextBox AddTextBox(string name, string caption, Func<string, bool> check, Action<string> save, string? value)
         {
-            var input = new TextBox { Name = name + "TextBox", Text = value ?? "", UseSystemPasswordChar = name == "Password" };
+            var input = new TextBox { Name = name + "TextBox", Text = value ?? "" };
             AddRow(name, caption, input);
             _bindings.Add((input, check, () => save(input.Text)));
             return input;
