@@ -795,7 +795,7 @@ namespace Netch.Forms
             this.RunAtStartupCheckBox.Name = "RunAtStartupCheckBox";
             this.RunAtStartupCheckBox.Size = new System.Drawing.Size(109, 21);
             this.RunAtStartupCheckBox.TabIndex = 4;
-            this.RunAtStartupCheckBox.Text = "Run at startup";
+            this.RunAtStartupCheckBox.Text = "Start at Windows sign-in";
             this.RunAtStartupCheckBox.UseVisualStyleBackColor = true;
             // 
             // CheckUpdateWhenOpenedCheckBox

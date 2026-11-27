@@ -20,6 +20,7 @@
         public static class Parameter
         {
             public const string Show = "-show";
+            public const string Startup = "--startup";
         }
 
         public const string WintunDllFile = "bin\\wintun.dll";

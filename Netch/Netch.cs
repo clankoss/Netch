@@ -59,7 +59,8 @@ namespace Netch
 
             if (!SingleInstance.IsFirstInstance)
             {
-                SingleInstance.PassArgumentsToFirstInstance(args.Append(Constants.Parameter.Show));
+                if (!args.Contains(Constants.Parameter.Startup))
+                    SingleInstance.PassArgumentsToFirstInstance(args.Append(Constants.Parameter.Show));
                 Environment.Exit(0);
                 return;
             }

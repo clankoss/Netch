@@ -193,7 +193,7 @@ namespace Netch.Forms
 
             BindCheckBox(MinimizeWhenStartedCheckBox, b => Global.Settings.MinimizeWhenStarted = b, Global.Settings.MinimizeWhenStarted);
 
-            BindCheckBox(RunAtStartupCheckBox, b => Global.Settings.RunAtStartup = b, Global.Settings.RunAtStartup);
+            RunAtStartupCheckBox.Checked = Global.Settings.RunAtStartup;
 
             BindCheckBox(CheckUpdateWhenOpenedCheckBox, b => Global.Settings.CheckUpdateWhenOpened = b, Global.Settings.CheckUpdateWhenOpened);
 
@@ -253,12 +253,27 @@ namespace Netch.Forms
 
             #region Save
 
+            var runAtStartup = RunAtStartupCheckBox.Checked;
+            if (runAtStartup || Global.Settings.RunAtStartup)
+            {
+                try
+                {
+                    StartupRegistration.SetEnabled(runAtStartup);
+                }
+                catch (Exception error)
+                {
+                    Log.Warning(error, "Could not configure Netch startup");
+                    MessageBox.Show(this, i18N.Translate("Could not configure Windows startup.") + "\n" + error.Message,
+                        Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
+
+            Global.Settings.RunAtStartup = runAtStartup;
             foreach (var pair in _saveActions)
                 pair.Value.Invoke(pair.Key);
 
             #endregion
-
-            Utils.Utils.RegisterNetchStartupItem();
 
             await Configuration.SaveAsync();
             MessageBoxX.Show(i18N.Translate("Saved"));

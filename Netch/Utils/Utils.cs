@@ -12,7 +12,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using MaxMind.GeoIP2;
-using Microsoft.Win32.TaskScheduler;
 using Serilog;
 using Task = System.Threading.Tasks.Task;
 
@@ -188,43 +187,6 @@ namespace Netch.Utils
                         ComponentIterator(control.ContextMenuStrip, func);
 
                     break;
-            }
-        }
-
-        public static void RegisterNetchStartupItem()
-        {
-            const string TaskName = "Netch Startup";
-            var folder = TaskService.Instance.GetFolder("\\");
-            var taskIsExists = folder.Tasks.Any(task => task.Name == TaskName);
-
-            if (Global.Settings.RunAtStartup)
-            {
-                if (taskIsExists)
-                    folder.DeleteTask(TaskName, false);
-
-                var td = TaskService.Instance.NewTask();
-
-                td.RegistrationInfo.Author = "Netch";
-                td.RegistrationInfo.Description = "Netch run at startup.";
-                td.Principal.RunLevel = TaskRunLevel.Highest;
-
-                td.Triggers.Add(new LogonTrigger());
-                td.Actions.Add(new ExecAction(Global.NetchExecutable));
-
-                td.Settings.ExecutionTimeLimit = TimeSpan.Zero;
-                td.Settings.DisallowStartIfOnBatteries = false;
-                td.Settings.StopIfGoingOnBatteries = false;
-                td.Settings.IdleSettings.StopOnIdleEnd = false;
-                td.Settings.IdleSettings.RestartOnIdle = false;
-                td.Settings.RunOnlyIfIdle = false;
-                td.Settings.Compatibility = TaskCompatibility.V2_1;
-
-                TaskService.Instance.RootFolder.RegisterTaskDefinition("Netch Startup", td);
-            }
-            else
-            {
-                if (taskIsExists)
-                    folder.DeleteTask(TaskName, false);
             }
         }
 
